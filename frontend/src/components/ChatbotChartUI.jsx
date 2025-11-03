@@ -59,7 +59,6 @@ const ChatbotChartUI = ({
               chartConfig: response.chartConfig,
               timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
-            
             addAssistantMessage(assistantMessage.text, assistantMessage.chartConfig);
             
             if (assistantMessage.chartConfig) {

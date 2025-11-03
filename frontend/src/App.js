@@ -6,8 +6,6 @@ function App() {
   // Function to call /api/chat endpoint and generate chart
   const handleChartGenerate = async (userMessage) => {
     try {
-
-
       // Call your API endpoint
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -16,9 +14,6 @@ function App() {
         },
         body: JSON.stringify({
           message: userMessage,
-          // Add any other data your API expects
-          // timestamp: new Date().toISOString(),
-          // userId: 'user123',
         }),
       });
 
@@ -30,20 +25,41 @@ function App() {
       // Parse the response
       const data = await response.json();
 
-      // Expected API response format:
+      // Your API response format:
       // {
-      //   text: "Here's your chart description...",
-      //   chartConfig: {
-      //     type: "bar",
-      //     title: "Chart Title",
-      //     option: { /* ECharts options */ }
-      //   }
+      //   "success": true,
+      //   "chart": { /* ECharts option object */ },
+      //   "message": "Text explanation",
+      //   "metadata": { ... }
       // }
+
+      // Check if the request was successful
+      if (!data.success) {
+        throw new Error(data.message || 'Chart generation failed');
+      }
+
+      // Extract clean text message (remove markdown code blocks if present)
+      let textMessage = data.message || 'Chart generated successfully';
+      
+      // Remove markdown code blocks (```json ... ```)
+      textMessage = textMessage.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      // If the message is just JSON, provide a default message
+      if (textMessage.startsWith('{') || textMessage.startsWith('[')) {
+        textMessage = 'Here is your chart visualization based on the data.';
+      }
+
+      // Build the chart config from the API response
+      const chartConfig = data.chart ? {
+        type: data.chart.series?.[0]?.type || 'bar',
+        title: data.chart.title?.text || 'Chart',
+        option: data.chart // The entire chart object is the ECharts option
+      } : null;
 
       // Return the data in the format expected by ChatbotChartUI
       return {
-        text: data.text || data.message || 'Chart generated successfully',
-        chartConfig: data.chartConfig || data.chart || null
+        text: textMessage,
+        chartConfig: chartConfig
       };
 
     } catch (error) {
@@ -60,8 +76,6 @@ function App() {
   // Optional: Callback when user sends a message (for logging, analytics, etc.)
   const handleMessageSend = (message) => {
     console.log('User sent message:', message);
-    // You can add analytics tracking here
-    // analytics.track('message_sent', { message });
   };
 
   return (

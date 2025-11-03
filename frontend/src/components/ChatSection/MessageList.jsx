@@ -14,8 +14,8 @@ const MessageList = ({ messages, onChartSelect }) => {
       <Box sx={{ maxWidth: 800, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
         {messages.map((message) => (
           <MessageBubble 
-            key={message.id} 
-            message={message.text} 
+            key={message.id}
+            message={message} 
             onChartSelect={onChartSelect}
           />
         ))}
