@@ -2,19 +2,23 @@ import './App.css';
 import ChatbotChartUI from './components/ChatbotChartUI';
 
 function App() {
+  // Determine backend base URL
+  const apiBase =
+  process.env.REACT_APP_BACKEND_URL ||
+  (window.location.hostname === 'localhost'
+    ? `http://localhost:${process.env.REACT_APP_BACKEND_PORT || 3001}`
+    : `http://backend:${process.env.REACT_APP_BACKEND_PORT || 3001}`);
   
   // Function to call /api/chat endpoint and generate chart
   const handleChartGenerate = async (userMessage) => {
     try {
       // Call your API endpoint
-      const response = await fetch('/api/chat', {
+      const response = await fetch(`${apiBase}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: userMessage,
-        }),
+        body: JSON.stringify({ message: userMessage }),
       });
 
       // Check if response is ok
@@ -25,55 +29,55 @@ function App() {
       // Parse the response
       const data = await response.json();
 
-      // Your API response format:
-      // {
-      //   "success": true,
-      //   "chart": { /* ECharts option object */ },
-      //   "message": "Text explanation",
-      //   "metadata": { ... }
-      // }
-
-      // Check if the request was successful
       if (!data.success) {
         throw new Error(data.message || 'Chart generation failed');
       }
 
       // Extract clean text message (remove markdown code blocks if present)
       let textMessage = data.message || 'Chart generated successfully';
-      
-      // Remove markdown code blocks (```json ... ```)
       textMessage = textMessage.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      
-      // If the message is just JSON, provide a default message
+
       if (textMessage.startsWith('{') || textMessage.startsWith('[')) {
         textMessage = 'Here is your chart visualization based on the data.';
       }
 
       // Build the chart config from the API response
-      const chartConfig = data.chart ? {
-        type: data.chart.series?.[0]?.type || 'bar',
-        title: data.chart.title?.text || 'Chart',
-        option: data.chart // The entire chart object is the ECharts option
-      } : null;
+      const chartConfig = data.chart
+        ? {
+            type: data.chart.series?.[0]?.type || 'bar',
+            title: data.chart.title?.text || 'Chart',
+            option: data.chart,
+          }
+        : null;
 
-      // Return the data in the format expected by ChatbotChartUI
       return {
         text: textMessage,
-        chartConfig: chartConfig
+        chartConfig: chartConfig,
       };
-
     } catch (error) {
       console.error('Error calling /api/chat:', error);
-      
-      // Return error message to display in chat
+
+      // Check for specific invalid chart configuration error
+      const errorMsg = error.message || '';
+      if (
+        errorMsg.includes('Invalid chart configuration') ||
+        errorMsg.includes('expected array, received undefined')
+      ) {
+        return {
+          text: 'Please enter a chart prompt so I can generate a visualization.',
+          chartConfig: null,
+        };
+      }
+
+      // Default error handling
       return {
         text: `Sorry, I encountered an error: ${error.message}. Please try again.`,
-        chartConfig: null
+        chartConfig: null,
       };
     }
   };
 
-  // Optional: Callback when user sends a message (for logging, analytics, etc.)
+  // Function to send to record of User Message to DB
   const handleMessageSend = (message) => {
     console.log('User sent message:', message);
   };
