@@ -11,7 +11,8 @@ const ChatSection = ({
   onSend, 
   onChartSelect,
   disabled = false,
-  chatConfig = {}
+  chatConfig = {},
+  isLoading = false
 }) => {
   return (
     <Box sx={{ 
@@ -27,7 +28,11 @@ const ChatSection = ({
         subtitle={chatConfig.subtitle}
         avatarIcon={chatConfig.avatarIcon}
       />
-      <MessageList messages={messages} onChartSelect={onChartSelect} />
+      <MessageList 
+        messages={messages} 
+        onChartSelect={onChartSelect}
+        isLoading={isLoading}
+      />
       <ChatInput 
         value={inputValue} 
         onChange={onInputChange} 

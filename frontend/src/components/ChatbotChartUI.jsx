@@ -1,11 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Box } from '@mui/material';
-
-import ChatSection from './ChatSection/ChatSection'
+import ChatSection from './ChatSection/ChatSection';
 import ChartPanel from './ChartPanel/ChartPanel';
 import useChatMessages from '../hooks/useChatMessages';
 import useChartDownload from '../hooks/downloadChart';
-
 /**
  * ChatbotChartUI - Main container component for the chatbot with chart visualization
  * 
@@ -33,19 +31,29 @@ const ChatbotChartUI = ({
   const [isLoading, setIsLoading] = useState(false);
   const chartInstanceRef = useRef(null);
   
+  // FIXED: Pass initialMessages only once, not on every render
   const { messages, addUserMessage, addAssistantMessage } = useChatMessages(initialMessages);
   const downloadChart = useChartDownload(chartInstanceRef);
 
   const handleSend = async () => {
     if (inputValue.trim() && !isLoading) {
-      const userMessageText = inputValue;
-      addUserMessage(userMessageText);
+      const userMessageText = inputValue.trim();
+      
+      // Clear input immediately
       setInputValue('');
+      
+      // Add user message
+      addUserMessage(userMessageText);
+      
       setIsLoading(true);
 
       // Call onMessageSend callback if provided
       if (onMessageSend) {
-        onMessageSend(userMessageText);
+        try {
+          onMessageSend(userMessageText);
+        } catch (error) {
+          console.error('Error in onMessageSend callback:', error);
+        }
       }
 
       try {
@@ -54,31 +62,38 @@ const ChatbotChartUI = ({
           const response = await onChartGenerate(userMessageText);
           
           if (response) {
-            const assistantMessage = {
-              text: response.text || 'Here is your chart visualization.',
-              chartConfig: response.chartConfig,
-              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            };
-            addAssistantMessage(assistantMessage.text, assistantMessage.chartConfig);
+            // Ensure we have a valid text response
+            const responseText = response.text || 'Here is your chart visualization.';
+            const responseChartConfig = response.chartConfig || null;
             
-            if (assistantMessage.chartConfig) {
-              setSelectedChart(assistantMessage);
+            // Add assistant message
+            addAssistantMessage(responseText, responseChartConfig);
+            
+            // If there's a chart, select it automatically
+            if (responseChartConfig) {
+              // Wait for the message to be added before selecting
+              setTimeout(() => {
+                setSelectedChart({
+                  text: responseText,
+                  chartConfig: responseChartConfig,
+                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+              }, 100);
             }
+          } else {
+            // Handle case where response is null/undefined
+            addAssistantMessage('I received your message but encountered an issue generating a response. Please try again.');
           }
         } else {
-          // Default fallback behavior - simple echo with sample chart
-          const assistantMessage = {
-            text: `I received your request: "${userMessageText}". Please provide an onChartGenerate function to generate actual charts.`,
-            chartConfig: null
-          };
-          
-          addAssistantMessage(assistantMessage.text, assistantMessage.chartConfig);
+          // Default fallback behavior
+          addAssistantMessage(
+            `I received your request: "${userMessageText}". Please provide an onChartGenerate function to generate actual charts.`
+          );
         }
       } catch (error) {
         console.error('Error generating chart:', error);
         addAssistantMessage(
-          'Sorry, I encountered an error while processing your request. Please try again.',
-          null
+          'Sorry, I encountered an error while processing your request. Please try again.'
         );
       } finally {
         setIsLoading(false);
@@ -87,24 +102,28 @@ const ChatbotChartUI = ({
   };
 
   const handleChartSelect = (message) => {
-    if (message.chartConfig) {
+    if (message && message.chartConfig) {
       setSelectedChart(message);
     }
   };
 
   const handleRefresh = () => {
-    chartInstanceRef.current?.resize();
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.resize();
+    }
   };
 
   const handleFullscreen = () => {
     if (chartInstanceRef.current) {
       const chartElement = chartInstanceRef.current.getDom();
-      if (chartElement.requestFullscreen) {
-        chartElement.requestFullscreen();
-      } else if (chartElement.webkitRequestFullscreen) {
-        chartElement.webkitRequestFullscreen();
-      } else if (chartElement.msRequestFullscreen) {
-        chartElement.msRequestFullscreen();
+      if (chartElement) {
+        if (chartElement.requestFullscreen) {
+          chartElement.requestFullscreen();
+        } else if (chartElement.webkitRequestFullscreen) {
+          chartElement.webkitRequestFullscreen();
+        } else if (chartElement.msRequestFullscreen) {
+          chartElement.msRequestFullscreen();
+        }
       }
     }
   };
@@ -124,6 +143,7 @@ const ChatbotChartUI = ({
         onChartSelect={handleChartSelect}
         disabled={isLoading}
         chatConfig={chatConfig}
+        isLoading={isLoading}
       />
       <ChartPanel
         selectedChart={selectedChart}
