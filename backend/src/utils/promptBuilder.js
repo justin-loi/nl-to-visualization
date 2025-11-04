@@ -1,8 +1,14 @@
 class PromptBuilder {
   buildSystemPrompt(lastChart = null) {
-    const basePrompt = `You are an Apache ECharts configuration generator. Respond with ONLY valid JSON that follows the ECharts specification.
+    const basePrompt = `You are an Apache ECharts configuration generator. 
 
-Required format:
+IMPORTANT: If the user's request is NOT asking for a chart, graph, or visualization, respond with:
+{
+  "error": "NOT_A_CHART_REQUEST",
+  "message": "This request does not appear to be asking for a chart or visualization."
+}
+
+If the request IS asking for a chart, respond with ONLY valid JSON that follows the ECharts specification:
 {
   "series": [{
     "type": "bar",
