@@ -57,21 +57,41 @@ function App() {
     } catch (error) {
       console.error('Error calling /api/chat:', error);
 
-      // Check for specific invalid chart configuration error
       const errorMsg = error.message || '';
-      if (
-        errorMsg.includes('Invalid chart configuration') ||
-        errorMsg.includes('expected array, received undefined')
-      ) {
+      
+      // Handle specific error cases with directive messaging
+      if (errorMsg.includes('Invalid chart configuration') || 
+          errorMsg.includes('expected array, received undefined')) {
         return {
-          text: 'Please enter a chart prompt so I can generate a visualization.',
+          text: 'I need chart details to create a visualization. Please specify: (1) chart type (bar, line, pie, etc.), (2) data values, and (3) labels. Example: "Create a bar chart showing sales: Q1=100, Q2=150, Q3=200, Q4=175"',
           chartConfig: null,
         };
       }
 
-      // Default error handling
+      if (errorMsg.includes('API error: 400')) {
+        return {
+          text: 'Your request format is invalid. Please provide a clear chart description including the type of chart and the data you want to visualize.',
+          chartConfig: null,
+        };
+      }
+
+      if (errorMsg.includes('API error: 500')) {
+        return {
+          text: 'The server encountered an error processing your chart. Try simplifying your request or use a different chart type (bar, line, pie, scatter, area).',
+          chartConfig: null,
+        };
+      }
+
+      if (errorMsg.includes('API error: 503') || errorMsg.includes('Failed to fetch')) {
+        return {
+          text: 'Unable to connect to the chart service. Please check your internet connection and try again in a moment.',
+          chartConfig: null,
+        };
+      }
+
+      // Default error with actionable guidance
       return {
-        text: `Sorry, I encountered an error: ${error.message}. Please try again.`,
+        text: `Chart generation failed: ${error.message}. Please try: (1) simplifying your request, (2) specifying exact data values, or (3) choosing a standard chart type like bar, line, or pie.`,
         chartConfig: null,
       };
     }
