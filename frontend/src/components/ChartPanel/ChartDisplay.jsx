@@ -2,9 +2,11 @@ import React from 'react';
 import { Box } from '@mui/material';
 import EChartsRenderer from './EChartsRenderer';
 import ChartDetails from './ChartDetails';
+import AIInsights from './AIInsights';
+import FollowUpQuestions from './FollowUpQuestions';
 import EmptyChartState from './EmptyChartState';
 
-const ChartDisplay = ({ selectedChart, chartInstanceRef }) => {
+const ChartDisplay = ({ selectedChart, chartInstanceRef, onFollowUpClick }) => {
   return (
     <Box sx={{ flex: 1, p: 3, overflowY: 'auto' }}>
       {selectedChart?.chartConfig ? (
@@ -17,6 +19,13 @@ const ChartDisplay = ({ selectedChart, chartInstanceRef }) => {
             type={selectedChart.chartConfig.type}
             title={selectedChart.chartConfig.title}
             timestamp={selectedChart.timestamp}
+          />
+
+          <AIInsights insights={selectedChart.insights} />
+
+          <FollowUpQuestions 
+            questions={selectedChart.followUpQuestions}
+            onQuestionClick={onFollowUpClick}
           />
         </Box>
       ) : (

@@ -6,9 +6,9 @@ import ChartDisplay from './ChartDisplay';
 const ChartPanel = ({ 
   selectedChart, 
   onDownload, 
-  onRefresh, 
   onFullscreen,
-  chartInstanceRef
+  chartInstanceRef,
+  onFollowUpClick
 }) => {
   return (
     <Box sx={{ 
@@ -18,14 +18,16 @@ const ChartPanel = ({
       bgcolor: 'background.paper'
     }}>
       <ChartPanelHeader
-        onRefresh={onRefresh}
         onDownload={onDownload}
         onFullscreen={onFullscreen}
+        chartInstanceRef={chartInstanceRef}
+        chartConfig={selectedChart?.chartConfig}
         disabled={!selectedChart}
       />
       <ChartDisplay 
         selectedChart={selectedChart}
         chartInstanceRef={chartInstanceRef}
+        onFollowUpClick={onFollowUpClick}
       />
     </Box>
   );

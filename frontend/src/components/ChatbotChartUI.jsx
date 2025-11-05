@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import ChatSection from './ChatSection/ChatSection';
 import ChartPanel from './ChartPanel/ChartPanel';
 import useChatMessages from '../hooks/useChatMessages';
-import useChartDownload from '../hooks/downloadChart';
+import CustomThemeProvider from './theme/ThemeProvider';
 /**
  * ChatbotChartUI - Main container component for the chatbot with chart visualization
  * 
@@ -33,7 +33,6 @@ const ChatbotChartUI = ({
   
   // FIXED: Pass initialMessages only once, not on every render
   const { messages, addUserMessage, addAssistantMessage } = useChatMessages(initialMessages);
-  const downloadChart = useChartDownload(chartInstanceRef);
 
   const handleSend = async () => {
     if (inputValue.trim() && !isLoading) {
@@ -107,10 +106,9 @@ const ChatbotChartUI = ({
     }
   };
 
-  const handleRefresh = () => {
-    if (chartInstanceRef.current) {
-      chartInstanceRef.current.resize();
-    }
+  const handlePromptClick = (promptText) => {
+    setInputValue(promptText);
+    handleSend(promptText);
   };
 
   const handleFullscreen = () => {
@@ -129,30 +127,32 @@ const ChatbotChartUI = ({
   };
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      height: '100vh', 
-      bgcolor: '#f5f5f5',
-      ...containerStyle 
-    }}>
-      <ChatSection
-        messages={messages}
-        inputValue={inputValue}
-        onInputChange={(e) => setInputValue(e.target.value)}
-        onSend={handleSend}
-        onChartSelect={handleChartSelect}
-        disabled={isLoading}
-        chatConfig={chatConfig}
-        isLoading={isLoading}
-      />
-      <ChartPanel
-        selectedChart={selectedChart}
-        onDownload={downloadChart}
-        onRefresh={handleRefresh}
-        onFullscreen={handleFullscreen}
-        chartInstanceRef={chartInstanceRef}
-      />
-    </Box>
+    <CustomThemeProvider>
+      <Box sx={{ 
+        display: 'flex', 
+        height: '100vh', 
+        bgcolor: '#f5f5f5',
+        ...containerStyle 
+      }}>
+        <ChatSection
+          messages={messages}
+          inputValue={inputValue}
+          onInputChange={(e) => setInputValue(e.target.value)}
+          onSend={handleSend}
+          onChartSelect={handleChartSelect}
+          disabled={isLoading}
+          chatConfig={chatConfig}
+          isLoading={isLoading}
+          onPromptClick={handlePromptClick}
+          showQuickStart={true}
+        />
+        <ChartPanel
+          selectedChart={selectedChart}
+          onFullscreen={handleFullscreen}
+          chartInstanceRef={chartInstanceRef}
+        />
+      </Box>
+    </CustomThemeProvider>
   );
 };
 

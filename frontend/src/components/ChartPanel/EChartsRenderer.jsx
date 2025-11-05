@@ -35,7 +35,7 @@ const EChartsRenderer = ({ chartConfig, chartInstanceRef }) => {
       elevation={0}
       sx={{
         flex: 1,
-        bgcolor: 'grey.50',
+        bgcolor: 'background.default',
         border: '1px solid',
         borderColor: 'divider',
         borderRadius: 2,

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import ChatHeader from './ChatHeader';
+import QuickStartPrompts from './QuickStartPrompts';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
 
@@ -12,7 +13,10 @@ const ChatSection = ({
   onChartSelect,
   disabled = false,
   chatConfig = {},
-  isLoading = false
+  isLoading = false,
+  onPromptClick,
+  showQuickStart = true,
+  streamingMessageId = null
 }) => {
   return (
     <Box sx={{ 
@@ -28,10 +32,15 @@ const ChatSection = ({
         subtitle={chatConfig.subtitle}
         avatarIcon={chatConfig.avatarIcon}
       />
+      <QuickStartPrompts 
+        onPromptClick={onPromptClick}
+        show={showQuickStart && messages.length === 0}
+      />
       <MessageList 
         messages={messages} 
         onChartSelect={onChartSelect}
         isLoading={isLoading}
+        streamingMessageId={streamingMessageId}
       />
       <ChatInput 
         value={inputValue} 
