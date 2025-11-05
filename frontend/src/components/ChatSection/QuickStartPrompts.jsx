@@ -5,7 +5,7 @@ import { TrendingUp, PieChart, Timeline, BarChart } from '@mui/icons-material';
 const QuickStartPrompts = ({ onPromptClick, show = true }) => {
   const prompts = [
     { text: 'Show me sales trends', icon: TrendingUp, color: '#1976d2' },
-    { text: 'Compare categories', icon: PieChart, color: '#9c27b0' },
+    { text: 'Compare expenses by categories', icon: PieChart, color: '#9c27b0' },
     { text: 'Plot time series', icon: Timeline, color: '#2e7d32' },
     { text: 'Create bar chart', icon: BarChart, color: '#ed6c02' },
   ];

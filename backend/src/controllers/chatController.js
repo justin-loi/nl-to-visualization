@@ -8,10 +8,10 @@ const streamService = new StreamService(chatService);
 
 async function handleChat(req, res) {
   const startTime = Date.now();
-
+  
   try {
     const { sessionId, message } = validateChatRequest(req.body);
-
+    
     logger.info(`REST request from session ${sessionId}: "${message.substring(0, 50)}..."`);
 
     const result = await chatService.generateChart(sessionId, message);
@@ -23,6 +23,8 @@ async function handleChat(req, res) {
       success: true,
       chart: result.chart,
       message: result.rawResponse,
+      insights: result.insights,
+      followUpQuestions: result.followUpQuestions,
       metadata: {
         duration,
         timestamp: new Date().toISOString()
@@ -32,7 +34,7 @@ async function handleChat(req, res) {
   } catch (error) {
     const duration = Date.now() - startTime;
     logger.error(`Error after ${duration}ms:`, error.message);
-
+    
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({
       error: error.message,
@@ -43,10 +45,10 @@ async function handleChat(req, res) {
 
 async function handleStreamChat(req, res) {
   const startTime = Date.now();
-
+  
   try {
     const { sessionId, message } = validateChatRequest(req.body);
-
+    
     logger.info(`Stream request from session ${sessionId}: "${message.substring(0, 50)}..."`);
 
     // Setup SSE
@@ -60,7 +62,7 @@ async function handleStreamChat(req, res) {
   } catch (error) {
     const duration = Date.now() - startTime;
     logger.error(`Stream error after ${duration}ms:`, error.message);
-
+    
     if (!res.headersSent) {
       res.status(error.statusCode || 500).json({
         error: error.message

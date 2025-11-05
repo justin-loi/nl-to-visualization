@@ -2,6 +2,7 @@ const { ClaudeClient } = require('../clients/claudeClient');
 const { ConversationStore } = require('../stores/conversationStore');
 const { ChartValidator } = require('../validators/chartValidator');
 const { PromptBuilder } = require('../utils/promptBuilder');
+const { InsightsService } = require('./insightsService');
 const { AppError } = require('../utils/errors');
 
 class ChatService {
@@ -10,6 +11,7 @@ class ChatService {
     this.conversationStore = ConversationStore.getInstance();
     this.chartValidator = new ChartValidator();
     this.promptBuilder = new PromptBuilder();
+    this.insightsService = new InsightsService();
   }
 
   async generateChart(sessionId, message) {
@@ -28,14 +30,28 @@ class ChatService {
 
     const responseText = response.content[0].text;
     const chartData = this._extractJSON(responseText);
+    
+    // Check if it's a non-chart request
+    if (chartData.error === 'NOT_A_CHART_REQUEST') {
+      throw new AppError(chartData.message || 'This request does not appear to be asking for a chart or visualization.', 400);
+    }
+    
     const validatedChart = this.chartValidator.validate(chartData);
+
+    // Generate insights and follow-up questions in parallel
+    const [insights, followUpQuestions] = await Promise.all([
+      this.insightsService.generateInsights(validatedChart, message),
+      this.insightsService.generateFollowUpQuestions(validatedChart, message)
+    ]);
 
     this.conversationStore.addMessage(sessionId, 'user', message, null);
     this.conversationStore.addMessage(sessionId, 'assistant', responseText, validatedChart);
 
     return {
       chart: validatedChart,
-      rawResponse: responseText
+      rawResponse: responseText,
+      insights,
+      followUpQuestions
     };
   }
 

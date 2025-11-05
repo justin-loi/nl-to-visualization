@@ -3,7 +3,7 @@ import { Box, Paper, Typography, Avatar } from '@mui/material';
 import { SmartToy, Person } from '@mui/icons-material';
 import ChartChip from '../ChartChip';
 
-const MessageBubble = ({ message, onChartSelect }) => {
+const MessageBubble = ({ message, onChartSelect, isStreaming }) => {
   const isUser = message.type === 'user';
   const AvatarIcon = isUser ? Person : SmartToy;
 
@@ -44,15 +44,33 @@ const MessageBubble = ({ message, onChartSelect }) => {
             bgcolor: isUser ? 'primary.main' : 'background.paper',
             color: isUser ? 'primary.contrastText' : 'text.primary',
             border: !isUser ? '1px solid' : 'none',
-            borderColor: 'divider'
+            borderColor: 'divider',
+            position: 'relative'
           }}
         >
-          <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+          <Typography variant="body2" sx={{ lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
             {message.text}
+            {isStreaming && (
+              <Box
+                component="span"
+                sx={{
+                  display: 'inline-block',
+                  width: 8,
+                  height: 16,
+                  ml: 0.5,
+                  bgcolor: 'primary.main',
+                  animation: 'blink 1s infinite',
+                  '@keyframes blink': {
+                    '0%, 49%': { opacity: 1 },
+                    '50%, 100%': { opacity: 0 }
+                  }
+                }}
+              />
+            )}
           </Typography>
         </Paper>
         
-        {message.chartConfig && (
+        {message.chartConfig && !isStreaming && (
           <ChartChip onClick={() => onChartSelect(message)} />
         )}
         

@@ -2,6 +2,7 @@ const { ClaudeClient } = require('../clients/claudeClient');
 const { ConversationStore } = require('../stores/conversationStore');
 const { ChartValidator } = require('../validators/chartValidator');
 const { PromptBuilder } = require('../utils/promptBuilder');
+const { InsightsService } = require('./insightsService');
 const { logger } = require('../utils/logger');
 
 class StreamService {
@@ -11,6 +12,7 @@ class StreamService {
     this.conversationStore = ConversationStore.getInstance();
     this.chartValidator = new ChartValidator();
     this.promptBuilder = new PromptBuilder();
+    this.insightsService = new InsightsService();
   }
 
   async streamChartGeneration(sessionId, message, res, startTime) {
@@ -64,7 +66,48 @@ class StreamService {
       clearTimeout(timeoutId);
 
       const chartData = this.chatService._extractJSON(fullResponse);
+      
+      // Check if it's a non-chart request
+      if (chartData.error === 'NOT_A_CHART_REQUEST') {
+        this.sendSSE(res, 'error', {
+          error: chartData.message || 'This request does not appear to be asking for a chart or visualization.'
+        });
+        res.end();
+        return;
+      }
+      
       const validatedChart = this.chartValidator.validate(chartData);
+
+      // Send chart immediately while generating insights/questions
+      this.sendSSE(res, 'chart_complete', { chartData: validatedChart });
+
+      // Generate insights and follow-up questions in parallel
+      logger.info('Generating insights and follow-up questions...');
+      
+      const insightsPromise = this.insightsService.generateInsights(validatedChart, message)
+        .then(insights => {
+          this.sendSSE(res, 'insights_update', { insights });
+          return insights;
+        })
+        .catch(error => {
+          logger.error('Insights generation failed:', error.message);
+          return [];
+        });
+
+      const questionsPromise = this.insightsService.generateFollowUpQuestions(validatedChart, message)
+        .then(questions => {
+          this.sendSSE(res, 'questions_update', { followUpQuestions: questions });
+          return questions;
+        })
+        .catch(error => {
+          logger.error('Questions generation failed:', error.message);
+          return [];
+        });
+
+      const [insights, followUpQuestions] = await Promise.all([
+        insightsPromise,
+        questionsPromise
+      ]);
 
       this.conversationStore.addMessage(sessionId, 'user', message, null);
       this.conversationStore.addMessage(sessionId, 'assistant', fullResponse, validatedChart);
@@ -72,9 +115,13 @@ class StreamService {
       const duration = Date.now() - startTime;
       logger.info(`Stream completed in ${duration}ms`);
 
+      // Send final complete event with all data
       this.sendSSE(res, 'complete', {
+        success: true,
         chartData: validatedChart,
         message: fullResponse,
+        insights,
+        followUpQuestions,
         metadata: {
           duration,
           timestamp: new Date().toISOString()

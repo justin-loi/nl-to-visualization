@@ -4,109 +4,241 @@ import ChatbotChartUI from './components/ChatbotChartUI';
 function App() {
   // Determine backend base URL
   const apiBase =
-  process.env.REACT_APP_BACKEND_URL ||
-  (window.location.hostname === 'localhost'
-    ? `http://localhost:${process.env.REACT_APP_BACKEND_PORT || 3001}`
-    : `http://backend:${process.env.REACT_APP_BACKEND_PORT || 3001}`);
+    process.env.REACT_APP_BACKEND_URL ||
+    (window.location.hostname === 'localhost'
+      ? `http://localhost:${process.env.REACT_APP_BACKEND_PORT || 3001}`
+      : `http://backend:${process.env.REACT_APP_BACKEND_PORT || 3001}`);
   
-  // Function to call /api/chat endpoint and generate chart
+  // Function to call /api/chat/stream endpoint with SSE
+  // Returns a stream handler object for progressive updates
   const handleChartGenerate = async (userMessage) => {
+    
+    let accumulatedMessage = '';
+    let accumulatedChart = null;
+    let accumulatedInsights = [];
+    let accumulatedFollowUpQuestions = [];
+    
+    let chunkCallback = null;
+    let completeCallback = null;
+    let errorCallback = null;
+
+    // Create stream handler object
+    const streamHandler = {
+      onChunk: (callback) => {
+        chunkCallback = callback;
+      },
+      onComplete: (callback) => {
+        completeCallback = callback;
+      },
+      onError: (callback) => {
+        errorCallback = callback;
+      }
+    };
+
+    // Start SSE connection with POST
     try {
-      // Call your API endpoint
-      const response = await fetch(`${apiBase}/api/chat`, {
+      fetch(`${apiBase}/api/chat/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
         },
         body: JSON.stringify({ message: userMessage }),
-      });
-
-      // Check if response is ok
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
-      }
-
-      // Parse the response
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.message || 'Chart generation failed');
-      }
-
-      // Extract clean text message (remove markdown code blocks if present)
-      let textMessage = data.message || 'Chart generated successfully';
-      textMessage = textMessage.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-
-      if (textMessage.startsWith('{') || textMessage.startsWith('[')) {
-        textMessage = 'Here is your chart visualization based on the data.';
-      }
-
-      // Build the chart config from the API response
-      const chartConfig = data.chart
-        ? {
-            type: data.chart.series?.[0]?.type || 'bar',
-            title: data.chart.title?.text || 'Chart',
-            option: data.chart,
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
-        : null;
 
-      return {
-        text: textMessage,
-        chartConfig: chartConfig,
-      };
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = ''; // Buffer for incomplete lines
+
+          const readStream = () => {
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                
+                // Process final data
+                const result = processFinalResponse(
+                  accumulatedMessage,
+                  accumulatedChart,
+                  accumulatedInsights,
+                  accumulatedFollowUpQuestions
+                );
+                
+                if (completeCallback) {
+                  completeCallback(result);
+                }
+                return;
+              }
+
+              // Decode chunk and add to buffer
+              const chunk = decoder.decode(value, { stream: true });
+              buffer += chunk;
+              
+              // Process complete lines
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  try {
+                    const jsonStr = line.slice(6).trim();
+                    if (!jsonStr) continue;
+                    
+                    const data = JSON.parse(jsonStr);
+
+                    if (data.type === 'message' || data.type === 'chunk') {
+                      // Stream text chunks
+                      const textChunk = data.content || data.text || '';
+                      accumulatedMessage += textChunk;
+                      
+                      // Call chunk callback for progressive display
+                      if (chunkCallback) {
+                        chunkCallback({ 
+                          text: textChunk, 
+                          accumulated: accumulatedMessage 
+                        });
+                      }
+                    } else if (data.type === 'chart') {
+                      // Receive chart data as separate event
+                      accumulatedChart = data.chart;
+                    } else if (data.type === 'insights') {
+                      // Receive insights
+                      accumulatedInsights = data.insights || [];
+                    } else if (data.type === 'followup' || data.type === 'followUpQuestions') {
+                      // Receive follow-up questions
+                      accumulatedFollowUpQuestions = data.questions || data.followUpQuestions || [];
+                    } else if (data.type === 'complete' || data.type === 'done') {
+                      // Stream complete
+                      
+                      // Process final data - check both event data and accumulated
+                      const finalText = data.message || accumulatedMessage || 'Chart generated successfully';
+                      const finalChart = data.chart || accumulatedChart;
+                      const finalInsights = data.insights || accumulatedInsights;
+                      const finalFollowUp = data.followUpQuestions || accumulatedFollowUpQuestions;
+
+                      const result = processFinalResponse(
+                        finalText, 
+                        finalChart, 
+                        finalInsights, 
+                        finalFollowUp
+                      );
+                      
+                      if (completeCallback) {
+                        completeCallback(result);
+                      }
+                      return;
+                    } else if (data.type === 'error') {
+                      // Handle error from server
+                      
+                      if (errorCallback) {
+                        errorCallback(new Error(data.error || 'Server error occurred'));
+                      }
+                      return;
+                    } else {
+                      // Unknown type - log for debugging
+                    }
+                  } catch (parseError) {
+                  }
+                }
+              }
+
+              readStream();
+            }).catch(error => {
+              if (errorCallback) {
+                errorCallback(error);
+              }
+            });
+          };
+
+          readStream();
+        })
+        .catch(error => {
+          if (errorCallback) {
+            errorCallback(error);
+          }
+        });
+
     } catch (error) {
-      console.error('Error calling /api/chat:', error);
-
-      const errorMsg = error.message || '';
-      
-      // Handle specific error cases with directive messaging
-      if (errorMsg.includes('Invalid chart configuration') || 
-          errorMsg.includes('expected array, received undefined')) {
-        return {
-          text: 'I need chart details to create a visualization. Please specify: (1) chart type (bar, line, pie, etc.), (2) data values, and (3) labels. Example: "Create a bar chart showing sales: Q1=100, Q2=150, Q3=200, Q4=175"',
-          chartConfig: null,
-        };
+      if (errorCallback) {
+        errorCallback(error);
       }
-
-      if (errorMsg.includes('API error: 400')) {
-        return {
-          text: 'Your request format is invalid. Please provide a clear chart description including the type of chart and the data you want to visualize.',
-          chartConfig: null,
-        };
-      }
-
-      if (errorMsg.includes('API error: 500')) {
-        return {
-          text: 'The server encountered an error processing your chart. Try simplifying your request or use a different chart type (bar, line, pie, scatter, area).',
-          chartConfig: null,
-        };
-      }
-
-      if (errorMsg.includes('API error: 503') || errorMsg.includes('Failed to fetch')) {
-        return {
-          text: 'Unable to connect to the chart service. Please check your internet connection and try again in a moment.',
-          chartConfig: null,
-        };
-      }
-
-      // Default error with actionable guidance
-      return {
-        text: `Chart generation failed: ${error.message}. Please try: (1) simplifying your request, (2) specifying exact data values, or (3) choosing a standard chart type like bar, line, or pie.`,
-        chartConfig: null,
-      };
     }
+
+    return streamHandler;
   };
 
-  // Function to send to record of User Message to DB
-  const handleMessageSend = (message) => {
-    console.log('User sent message:', message);
+  // Helper function to extract chart from JSON in message text
+  const extractChartFromMessage = (message) => {
+    try {
+      // Try to find JSON block in message
+      const jsonMatch = message.match(/```json\n?([\s\S]*?)\n?```/);
+      if (jsonMatch) {
+        const chartData = JSON.parse(jsonMatch[1]);
+        return chartData;
+      }
+
+      // Try to parse the entire message as JSON
+      if (message.trim().startsWith('{')) {
+        const chartData = JSON.parse(message);
+        return chartData;
+      }
+    } catch (error) {
+      console.log('📊 [Frontend] Could not extract chart from message:', error.message);
+    }
+    return null;
+  };
+
+  // Helper function to process final response
+  const processFinalResponse = (message, chart, insights = [], followUpQuestions = []) => {
+
+    let textMessage = message || 'Chart generated successfully';
+    let chartData = chart;
+
+    // If no chart data was received as separate event, try to extract from message
+    if (!chartData && textMessage) {
+      chartData = extractChartFromMessage(textMessage);
+      
+      if (chartData) {
+        // Remove the JSON from the message text
+        textMessage = textMessage.replace(/```json\n?[\s\S]*?\n?```/g, '').trim();
+        if (!textMessage || textMessage.startsWith('{')) {
+          textMessage = 'Here is your chart visualization based on the data.';
+        }
+      }
+    }
+
+    // Clean message text
+    textMessage = textMessage.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+    // If the message is just JSON, provide a default message
+    if (textMessage.startsWith('{') || textMessage.startsWith('[')) {
+      textMessage = 'Here is your chart visualization based on the data.';
+    }
+
+    // Build chart config
+    const chartConfig = chartData
+      ? {
+          type: chartData.series?.[0]?.type || 'bar',
+          title: chartData.title?.text || 'Chart',
+          option: chartData,
+        }
+      : null;
+
+    return {
+      text: textMessage,
+      chartConfig: chartConfig,
+      insights: insights || [],
+      followUpQuestions: followUpQuestions || []
+    };
   };
 
   return (
     <div>
       <ChatbotChartUI 
         onChartGenerate={handleChartGenerate}
-        onMessageSend={handleMessageSend}
+        onMessageSend={(msg) => console.log('🔵 [Frontend] User sent:', msg)}
         chatConfig={{
           title: 'Chart Assistant',
           subtitle: 'Ask me to visualize your data'

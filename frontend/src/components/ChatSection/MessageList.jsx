@@ -3,10 +3,9 @@ import { Box, Paper, Avatar, CircularProgress } from '@mui/material';
 import MessageBubble from './MessageBubble/MessageBubble';
 import { SmartToy } from '@mui/icons-material';
 
-const MessageList = ({ messages, onChartSelect, isLoading }) => {
+const MessageList = ({ messages, onChartSelect, isLoading, streamingMessageId }) => {
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
@@ -17,19 +16,19 @@ const MessageList = ({ messages, onChartSelect, isLoading }) => {
       overflowY: 'auto', 
       px: 3, 
       py: 3,
-      bgcolor: '#fafafa'
+      bgcolor: 'background.default'
     }}>
       <Box sx={{ maxWidth: 800, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {messages.map((message, index) => (
+        {messages.map((message) => (
           <MessageBubble 
-            key={index} 
+            key={message.id} 
             message={message} 
             onChartSelect={onChartSelect}
+            isStreaming={message.id === streamingMessageId}
           />
         ))}
         
-        {/* Loading Bubble */}
-        {isLoading && (
+        {isLoading && !streamingMessageId && (
           <Box
             sx={{
               display: 'flex',
@@ -99,33 +98,18 @@ const MessageList = ({ messages, onChartSelect, isLoading }) => {
           </Box>
         )}
         
-        {/* Scroll anchor */}
         <div ref={messagesEndRef} />
       </Box>
       
-      {/* CSS Animations */}
       <style>
         {`
           @keyframes bounce {
-            0%, 80%, 100% {
-              transform: scale(0);
-              opacity: 0.5;
-            }
-            40% {
-              transform: scale(1);
-              opacity: 1;
-            }
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
           }
-          
           @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: translateY(10px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
           }
         `}
       </style>

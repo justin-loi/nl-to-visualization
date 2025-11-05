@@ -27,7 +27,6 @@ const ChartPanelHeader = ({
   };
 
   const handleCopyImage = async () => {
-    console.log(chartInstanceRef)
     const success = await copyChartAsImage(chartInstanceRef?.current);
     handleMenuClose();
     showSnackbar(
