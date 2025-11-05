@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Box, Paper, Avatar, CircularProgress } from '@mui/material';
 import MessageBubble from './MessageBubble/MessageBubble';
 import { SmartToy } from '@mui/icons-material';

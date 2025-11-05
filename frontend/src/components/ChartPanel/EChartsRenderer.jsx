@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { Box, Paper } from '@mui/material';
 import * as echarts from 'echarts';
 
@@ -34,13 +34,7 @@ const EChartsRenderer = ({ chartConfig, chartInstanceRef }) => {
         chartInstanceRef.current = instance;
       }
       
-      const handleResize = () => {
-        instance?.resize();
-      };
-      window.addEventListener('resize', handleResize);
-      
       return () => {
-        window.removeEventListener('resize', handleResize);
         instance?.dispose();
       };
     }

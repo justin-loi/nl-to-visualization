@@ -1,4 +1,3 @@
-import React from 'react';
 import { Paper, Box, Avatar, Typography } from '@mui/material';
 import { SmartToy } from '@mui/icons-material';
 

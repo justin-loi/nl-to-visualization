@@ -1,4 +1,3 @@
-import React from 'react';
 import { BarChart } from '@mui/icons-material';
 import EmptyState from '../shared/EmptyState';
 

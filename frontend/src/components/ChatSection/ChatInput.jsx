@@ -1,4 +1,3 @@
-import React from 'react';
 import { Paper, Box, TextField, IconButton, Typography } from '@mui/material';
 import { Send } from '@mui/icons-material';
 

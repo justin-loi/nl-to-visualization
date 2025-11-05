@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Box } from '@mui/material';
 import ChatSection from './ChatSection/ChatSection';
 import ChartPanel from './ChartPanel/ChartPanel';

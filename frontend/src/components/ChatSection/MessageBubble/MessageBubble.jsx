@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Paper, Typography, Avatar } from '@mui/material';
 import { SmartToy, Person } from '@mui/icons-material';
 import ChartChip from '../ChartChip';

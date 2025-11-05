@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box } from '@mui/material';
 import ChartPanelHeader from './ChartPanelHeader';
 import ChartDisplay from './ChartDisplay';

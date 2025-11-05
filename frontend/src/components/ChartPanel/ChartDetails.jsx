@@ -1,4 +1,3 @@
-import React from 'react';
 import { Paper, Typography, Box } from '@mui/material';
 
 const ChartDetails = ({ type, title, timestamp }) => {
