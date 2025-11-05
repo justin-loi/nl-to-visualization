@@ -11,8 +11,24 @@ const EChartsRenderer = ({ chartConfig, chartInstanceRef }) => {
         chartInstanceRef.current.dispose();
       }
       
-      const instance = echarts.init(chartRef.current);
-      instance.setOption(chartConfig.option);
+      const option = {
+      ...chartConfig.option,
+      title: {
+        ...chartConfig.option.title,
+        top: chartConfig.option?.title?.top ?? 10,
+      },
+      legend: {
+        ...chartConfig.option.legend,
+        top: chartConfig.option?.legend?.top ?? 60,
+      },
+      grid: {
+        ...chartConfig.option.grid,
+        top: chartConfig.option?.grid?.top ?? 100,
+      },
+    };
+
+    const instance = echarts.init(chartRef.current);
+    instance.setOption(option);
       
       if (chartInstanceRef) {
         chartInstanceRef.current = instance;
