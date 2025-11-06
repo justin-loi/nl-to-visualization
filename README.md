@@ -38,7 +38,7 @@ nl-to-visualization/
 
 - Docker and Docker Compose installed
 - Anthropic API key ([Get one here](https://console.anthropic.com/))
-- Ports 3000 (frontend) and 5001 (backend) available
+- Ports 8080 (frontend) and 5001 (backend) available
 
 ### Installation Steps
 
@@ -150,12 +150,14 @@ Environment variables ensure API keys are never exposed in client-side code or v
 **Backend Tests:**
 ```bash
 cd backend
+npm install
 npm test
 ```
 
 **Frontend Tests:**
 ```bash
 cd frontend
+npm install
 npm test
 ```
 
@@ -192,7 +194,7 @@ Extend model prompt tuning to handle more complex chart types, including network
 
 ---
 
-## Contact & Support
+## Links
 
 **Repository:** https://github.com/justin-loi/nl-to-visualization  
 **Live Demo:** https://nl2v.onrender.com/  
