@@ -20,7 +20,7 @@ class StreamService {
     const lastChart = this.conversationStore.getLastChart(sessionId);
     const systemPrompt = this.promptBuilder.buildSystemPrompt(lastChart);
 
-    const timeoutDuration = parseInt(process.env.STREAM_TIMEOUT || '30000');
+    const timeoutDuration = parseInt('30000');
     const timeoutId = setTimeout(() => {
       this.sendSSE(res, 'error', {
         error: 'Request timeout - chart generation took too long'

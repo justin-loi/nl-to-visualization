@@ -3,7 +3,7 @@ class ConversationStore {
 
   constructor() {
     this.conversations = new Map();
-    this.maxHistoryLength = parseInt(process.env.MAX_HISTORY_LENGTH || '50');
+    this.maxHistoryLength = parseInt('50');
   }
 
   static getInstance() {
