@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Paper, Box, Typography, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Divider, Snackbar, Alert } from '@mui/material';
 import { Fullscreen, MoreVert, ContentCopy, Download, DataObject, TableChart, Brightness4, Brightness7 } from '@mui/icons-material';
 import { useThemeMode } from '../../theme/ThemeProvider';
@@ -13,6 +13,10 @@ const ChartPanelHeader = ({
   const [anchorEl, setAnchorEl] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const { mode, toggleTheme } = useThemeMode();
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-mui-color-scheme', mode);
+  }, [mode]);
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);

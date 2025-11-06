@@ -38,11 +38,16 @@
 }
 
 :fullscreen {
-  background-color: white !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: white;
   width: 100vw;
   height: 100vh;
+  background-color: white; /* default for light mode */
+}
+
+/* If in dark mode, the background is black instead */
+:root[data-mui-color-scheme='dark'] :fullscreen,
+body.dark :fullscreen {
+  background-color: #000 !important;
 }
