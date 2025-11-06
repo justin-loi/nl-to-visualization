@@ -173,9 +173,7 @@ const ChatbotChartUI = ({
     }
   };
   
-
   const handlePromptClick = (promptText) => {
-    setInputValue(promptText);
     handleSend(promptText);
   };
 
