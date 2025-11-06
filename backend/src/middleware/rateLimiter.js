@@ -14,7 +14,7 @@ const createLimiter = (windowMs, max) => {
 };
 
 const rateLimiters = {
-  api: createLimiter(60 * 1000, 20),      // 20 requests per minute
+  api: createLimiter(60 * 1000, 10),      // 10 requests per minute
   stream: createLimiter(60 * 1000, 10),   // 10 requests per minute
   health: createLimiter(60 * 1000, 100)   // 100 requests per minute
 };

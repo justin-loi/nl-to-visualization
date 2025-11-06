@@ -43,7 +43,7 @@ class InsightsService {
       const prompt = this._buildFollowUpPrompt(chartData, userMessage);
       
       const response = await this.claudeClient.createMessage({
-        system: "You are a helpful assistant suggesting follow-up questions that can be visualized as charts or graphs. Return ONLY a JSON array of question strings. Each question should request information that is measurable, quantitative, or comparable (e.g., trends, distributions, comparisons, or breakdowns). Do not include questions that cannot be represented visually.",
+        system: "You are a helpful assistant suggesting follow-up questions that can be visualized as charts. Return ONLY a JSON array of question strings. Each question must be representable using one of the following chart types: bar, line, pie, scatter, radar, heatmap, or candlestick.",
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 512
       });

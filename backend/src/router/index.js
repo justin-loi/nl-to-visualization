@@ -11,7 +11,9 @@ function setupRoutes(app) {
   router.get('/', healthController.root);
 
   // Chat endpoints
+  // REST API version (keeping for future use)
   router.post('/api/chat', rateLimiters.api, chatController.handleChat);
+  // SSE version (currently being used)
   router.post('/api/chat/stream', rateLimiters.stream, chatController.handleStreamChat);
 
   app.use(router);
