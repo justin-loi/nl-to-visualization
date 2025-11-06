@@ -22,7 +22,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.BACKEND_PORT || 3001;
 const server = app.listen(PORT, () => {
   logger.info(`✅ Server listening on port ${PORT}`);
   logger.info(`📊 API endpoints:`);
