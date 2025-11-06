@@ -3,10 +3,10 @@ import { TrendingUp, PieChart, Timeline, BarChart } from '@mui/icons-material';
 
 const QuickStartPrompts = ({ onPromptClick, show = true }) => {
   const prompts = [
-    { text: 'Show monthly sales trends over the past year', icon: TrendingUp, color: '#1976d2' },
-    { text: 'Compare total expenses by category for this quarter', icon: PieChart, color: '#9c27b0' },
-    { text: 'Plot daily revenue as a time series line chart', icon: Timeline, color: '#2e7d32' },
-    { text: 'Create a bar chart showing product sales by region', icon: BarChart, color: '#ed6c02' },
+    { text: 'Show monthly Tesla vehicle sales trends over the past year', icon: TrendingUp, color: '#1976d2' },
+    { text: 'Compare Tesla expenses by category for this quarter', icon: PieChart, color: '#9c27b0' },
+    { text: 'Plot Tesla daily revenue as a time series line chart', icon: Timeline, color: '#2e7d32' },
+    { text: 'Create a bar chart showing Tesla vehicle sales by region', icon: BarChart, color: '#ed6c02' },
   ];
 
   if (!show) return null;
