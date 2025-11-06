@@ -192,33 +192,6 @@ Extend model prompt tuning to handle more complex chart types, including network
 
 ---
 
-## Troubleshooting
-
-**Container Issues**
-```bash
-# Rebuild containers
-docker compose up build
-```
-
-**Port Conflicts**  
-If ports 3000 or 5001 are already in use, modify the port mappings in `docker-compose.yml`
-
-**API Connection Errors**  
-Verify that your `ANTHROPIC_API_KEY` is correctly set in the `.env` file and that you have sufficient API credits.
-
----
-
-## Contributing
-
-Contributions are welcome. Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch
-3. Write tests for new functionality
-4. Submit a pull request with a clear description
-
----
-
 ## Contact & Support
 
 **Repository:** https://github.com/justin-loi/nl-to-visualization  
