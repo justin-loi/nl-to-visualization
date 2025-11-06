@@ -67,13 +67,8 @@ const ChatbotChartUI = ({
             let finalInsights = [];
             let finalFollowUpQuestions = [];
 
-            streamHandler.onChunk((chunk) => {
-              // Update message text as chunks arrive
-              if (chunk.text) {
-                accumulatedText += chunk.text;
-                updateMessageText(assistantMessageId, accumulatedText);
-              }
-            });
+            // Default Message while waiting for streamHandler to Finish
+            updateMessageText(assistantMessageId, "Generating Chart.... ");
 
             streamHandler.onComplete((finalData) => {
               // Stream complete

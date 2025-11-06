@@ -1,4 +1,4 @@
-import { Box, Paper, Typography, Avatar } from '@mui/material';
+import { Box, Paper, Typography, CircularProgress, Avatar } from '@mui/material';
 import { SmartToy, Person } from '@mui/icons-material';
 import ChartChip from '../ChartChip/ChartChip';
 
@@ -53,18 +53,13 @@ const MessageBubble = ({ message, onChartSelect, isStreaming }) => {
               <Box
                 component="span"
                 sx={{
-                  display: 'inline-block',
-                  width: 8,
-                  height: 16,
+                  display: 'inline-flex',
+                  alignItems: 'center',
                   ml: 0.5,
-                  bgcolor: 'primary.main',
-                  animation: 'blink 1s infinite',
-                  '@keyframes blink': {
-                    '0%, 49%': { opacity: 1 },
-                    '50%, 100%': { opacity: 0 }
-                  }
                 }}
-              />
+              >
+                <CircularProgress size={16} color="primary" />
+              </Box>
             )}
           </Typography>
         </Paper>
