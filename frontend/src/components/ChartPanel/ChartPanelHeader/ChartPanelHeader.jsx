@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Paper, Box, Typography, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Divider, Snackbar, Alert } from '@mui/material';
 import { Fullscreen, MoreVert, ContentCopy, Download, DataObject, TableChart, Brightness4, Brightness7 } from '@mui/icons-material';
-import { useThemeMode } from '../theme/ThemeProvider';
-import { copyChartAsImage, downloadChartAsPNG, exportChartAsJSON, exportChartAsCSV } from '../utils/exportUtils';
+import { useThemeMode } from '../../theme/ThemeProvider';
+import { copyChartAsImage, downloadChartAsPNG, exportChartAsJSON, exportChartAsCSV } from '../../utils/exportUtils';
 
 const ChartPanelHeader = ({
   onFullscreen, 

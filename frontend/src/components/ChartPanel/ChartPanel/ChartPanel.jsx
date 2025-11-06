@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
-import ChartPanelHeader from './ChartPanelHeader';
-import ChartDisplay from './ChartDisplay';
+import ChartPanelHeader from '../ChartPanelHeader/ChartPanelHeader';
+import ChartDisplay from '../ChartDisplay/ChartDisplay';
 
 const ChartPanel = ({ 
   selectedChart, 

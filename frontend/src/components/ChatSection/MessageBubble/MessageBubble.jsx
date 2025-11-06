@@ -1,6 +1,6 @@
 import { Box, Paper, Typography, Avatar } from '@mui/material';
 import { SmartToy, Person } from '@mui/icons-material';
-import ChartChip from '../ChartChip';
+import ChartChip from '../ChartChip/ChartChip';
 
 const MessageBubble = ({ message, onChartSelect, isStreaming }) => {
   const isUser = message.type === 'user';

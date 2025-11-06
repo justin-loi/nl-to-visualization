@@ -1,5 +1,5 @@
 import { BarChart } from '@mui/icons-material';
-import EmptyState from '../shared/EmptyState';
+import EmptyState from '../../shared/EmptyState';
 
 const EmptyChartState = () => {
   return (

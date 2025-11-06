@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
-import ChatHeader from './ChatHeader';
-import QuickStartPrompts from './QuickStartPrompts';
-import MessageList from './MessageList';
-import ChatInput from './ChatInput';
+import ChatHeader from '../ChatHeader/ChatHeader';
+import QuickStartPrompts from '../QuickStartPrompts/QuickStartPrompts';
+import MessageList from '../MessageList/MessageList';
+import ChatInput from '../ChatInput/ChatInput';
 
 const ChatSection = ({ 
   messages, 

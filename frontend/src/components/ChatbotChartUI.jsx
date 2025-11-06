@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Box } from '@mui/material';
-import ChatSection from './ChatSection/ChatSection';
-import ChartPanel from './ChartPanel/ChartPanel';
+import ChartPanel from './ChartPanel/ChartPanel/ChartPanel';
+import ChatSection from './ChatSection/ChatSection/ChatSection';
 import useChatMessages from '../hooks/useChatMessages';
 import CustomThemeProvider from './theme/ThemeProvider';
 /**

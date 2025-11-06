@@ -1,9 +1,9 @@
 import { Box } from '@mui/material';
-import EChartsRenderer from './EChartsRenderer';
-import ChartDetails from './ChartDetails';
-import AIInsights from './AIInsights';
-import FollowUpQuestions from './FollowUpQuestions';
-import EmptyChartState from './EmptyChartState';
+import EChartsRenderer from '../EChartsRenderer/EChartsRenderer.jsx';
+import ChartDetails from '../ChartDetails/ChartDetails.jsx';
+import AIInsights from '../AIInsights/AIInsights.jsx';
+import FollowUpQuestions from '../FollowUpQuestions/FollowUpQuestions.jsx';
+import EmptyChartState from '../EmptyChartState/EmptyChartState.jsx';
 
 const ChartDisplay = ({ selectedChart, chartInstanceRef, onFollowUpClick }) => {
   return (
